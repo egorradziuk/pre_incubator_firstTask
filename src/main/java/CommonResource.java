@@ -18,7 +18,6 @@ class CommonResource{
         } catch (IOException e) {
             System.out.println(e);
         }
-        System.out.println(sb.toString());
         return sb;
     }
 }

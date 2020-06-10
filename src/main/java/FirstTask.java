@@ -1,3 +1,11 @@
+import com.sun.istack.internal.NotNull;
+
+import javax.annotation.PostConstruct;
+import java.lang.annotation.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -13,7 +21,9 @@ public class FirstTask {
 //        workWithConsole();
 //        checkingExceptionWork();
 //        checkingLambdaWork();
-        checkingThreadsWork();
+//        checkingThreadsWork();
+        checkingStringFields(new Demo1());
+//        checkingReturnValues(new Demo());
     }
 
     public static void workWithConsole() {
@@ -88,6 +98,87 @@ public class FirstTask {
         }
     }
 
+    public static void checkingStringFields(Object obj) {
+
+        Field[] fields = obj.getClass().getFields();
+        for (Field field : fields) {
+            System.out.println("Field name: " + field.getName()
+                    + " (type: " + field.getType().getSimpleName() + ")");
+            if (field.getType().equals(String.class)) {
+                try {
+                    Validation.checkCorrection(field.get(obj).toString().toCharArray());
+                    System.out.println("The field \"" + field.getName()
+                                    + "\" is correct.");
+                } catch (MyException e) {
+                    System.out.println(e);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public static void checkingReturnValues(Object obj) {
+
+        Method[] methods = obj.getClass().getMethods();
+        for (Method m : methods) {
+            if (m.getAnnotation(S.class) != null) {
+                if (m.getReturnType().equals(String.class)) {
+                    //System.out.println(m.getName());
+                    try {
+                        String result = String.valueOf(m.invoke(obj));
+                        Validation.checkCorrection(result.toCharArray());
+                        System.out.println("Return value form method \""
+                                + m.getName() + "\" is correct.");
+                    } catch (MyException e) {
+                        System.out.println(e);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
 }
 
 
+class Demo {
+    public int a = 1;
+    public String str = "{[<>]}";
+
+    @S("asd")
+    public String getStr() {
+        return str;
+    }
+}
+
+class Demo1 {
+    public int a = 1;
+    public String str = "{[<()>]}";
+    public String str2 = "{[<()>]";
+    public String str3 = "{[()>]}";
+}
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+@interface S {
+    String value();// default "S: default value";
+}
+
+@Retention(RetentionPolicy.RUNTIME)
+@interface A {
+    String value();
+    String description() default "A: default value";
+}
+
+@Target(ElementType.TYPE_USE)
+@Retention(RetentionPolicy.RUNTIME)
+@interface Unique {}
+
+@Target(ElementType.TYPE_USE)
+@Retention(RetentionPolicy.RUNTIME)
+@interface MaxLen {
+    int value();
+}
