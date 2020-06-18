@@ -15,8 +15,7 @@ public class MyThread extends Thread {
         System.out.println(Thread.currentThread().getName() + " started.");
         if (Validation.isCorrect(res.readFromFile().toString().toCharArray())) {
             System.out.println(Thread.currentThread().getName() + ": Your " +
-                    "string is " +
-                    "correct.");
+                    "string is correct.");
         } else {
             System.out.println(Thread.currentThread().getName() + ": Your " +
                     "string isn't correct.");
