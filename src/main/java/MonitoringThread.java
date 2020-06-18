@@ -21,8 +21,8 @@ public class MonitoringThread implements Runnable {
             while (iterator.hasNext()) {
                 Object obj = iterator.next();
                 if (obj.getClass().isAnnotationPresent(MyAnno.class)) {
-                    checkMethods(obj.getClass());
-//                    checkFields(obj.getClass());
+                    checkMethods(obj);
+                    checkFields(obj);
                     iterator.remove();
                 } else {
                     iterator.remove();
@@ -34,13 +34,15 @@ public class MonitoringThread implements Runnable {
     private void checkMethods(Object obj) {
         Method[] methods = obj.getClass().getMethods();
         for (Method m : methods) {
+
             if (m.getAnnotation(CheckMethod.class) != null) {
                 if (m.getReturnType().equals(String.class)) {
+//                    System.out.println(m.getName());
                     try {
-                        String result = (String) m.invoke(obj);
+                        String result = null;
+                        result = (String) m.invoke(obj);
                         if (result != null) {
-                            Validation.checkCorrection
-                                    (result.toCharArray());
+                            Validation.checkCorrection(result.toCharArray());
                             System.out.println("Return value form method \""
                                     + m.getName() + "\" is correct.");
                         }
@@ -59,13 +61,14 @@ public class MonitoringThread implements Runnable {
     private void checkFields(Object obj) {
         Field[] fields = obj.getClass().getFields();
         for (Field f : fields) {
+
             if (f.getAnnotation(CheckField.class) != null) {
                 if (f.getType().equals(String.class)) {
+//                    System.out.println(m.getName());
                     try {
                         String result = (String) f.get(obj);
                         if (result != null) {
-                            Validation.checkCorrection
-                                    (result.toCharArray());
+                            Validation.checkCorrection(result.toCharArray());
                             System.out.println("Return value form field \""
                                     + f.getName() + "\" is correct.");
                         }
@@ -78,4 +81,6 @@ public class MonitoringThread implements Runnable {
             }
         }
     }
+
+
 }
